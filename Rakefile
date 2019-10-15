@@ -9,7 +9,9 @@ namespace 'redis' do
     puts 'connected to redis'
   end
 
-  file 'dump.rdb.bak': %w[redis:connect dump.rdb] do |_|
+  file 'dump.rdb.bak': 'dump.rdb' do |t|
+    bname = t.prerequisites[1]
+    sh 'cp', bname, (bname + '.bak')
   end
 
   desc 'Backs up redis and deletes all keys'
