@@ -1,39 +1,49 @@
-desc 'prereq task for connecting to redis database DON\'T USE'
-task :connect_redis do
-  # make connection to redis
-  require 'redis'
-  $redis = Redis.new(host: 'localhost')
-  puts 'connected to redis'
-end
+# TODO: Use namespaces (bigcommerce, redis)
 
-desc 'prereq task for connecting to bigcommerce. DON\'T USE'
-task :connect_bc do
-  # make connection to bigcommerce
-  require 'bigcommerce'
-  require 'dotenv'
-  Bigcommerce.configure do |c| # TODO:
-    c.store_hash   = ENV[''] # ???
-    c.client_id    = ENV['BIGCOMMERCE_CLIENT_ID']
-    c.access_token = ENV['BIGCOMMERCE_ACCESS_TOKEN']
+namespace 'redis' do
+  desc 'prereq task for connecting to redis database DON\'T USE'
+  task :connect do
+    # make connection to redis
+    require 'redis'
+    $redis = Redis.new(host: 'localhost')
+    puts 'connected to redis'
   end
-  puts 'connect_bc'
+
+  file 'dump.rdb.bak': %w[redis:connect dump.rdb] do |_|
+  end
+
+  desc 'Backs up redis and deletes all keys'
+  task clear: %w[redis:connect dump.rdb.bak] do
+    puts "clear_redis"
+  end
 end
 
-desc 'Clears redis database.'
-task clear_redis: %w[connect_redis] do
-  puts "clear_redis"
-end
+namespace 'bigcommerce' do
+  desc 'prereq task for connecting to bigcommerce. DON\'T USE'
+  task :connect do
+    # make connection to bigcommerce
+    require 'bigcommerce'
+    require 'dotenv'
+    Bigcommerce.configure do |c| # TODO:
+      c.store_hash   = ENV[''] # ???
+      c.client_id    = ENV['BIGCOMMERCE_CLIENT_ID']
+      c.access_token = ENV['BIGCOMMERCE_ACCESS_TOKEN']
+    end
+    puts 'connect_bc'
+  end
 
-desc <<~HEREDOC
+  # TODO: Should only clear redis IF getting products goes well
+  desc <<~HEREDOC
   Updates product -> id info in redis.
   Doesn't delete first manually, see reset task.
-HEREDOC
-multitask load_products: %w[connect_redis, connect_bc] do
-  puts "load_products"
+  HEREDOC
+  multitask load_products: %w[redis:connect bigcommerce:connect] do
+    puts 'bigcommerce:load_products WIP'
+  end
 end
 
 desc 'clears redis database and reloads it with fresh product -> id information'
-task reset: %w[clear_redis load_products]
+task reset: %w[redis:clear bigcommerce:load_products]
 
 task :default do
   puts <<~HEREDOC
