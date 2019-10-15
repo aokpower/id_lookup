@@ -1,17 +1,16 @@
-# TODO: Use namespaces (bigcommerce, redis)
+# TODO: add catch blocks with aborts to connect tasks
+
+file 'dump.rdb.bak': 'dump.rdb' do |t|
+  bname = t.prerequisites[0]
+  sh 'cp', bname, (bname + '.bak')
+end
 
 namespace 'redis' do
   desc 'prereq task for connecting to redis database DON\'T USE'
   task :connect do
-    # make connection to redis
     require 'redis'
     $redis = Redis.new(host: 'localhost')
     puts 'connected to redis'
-  end
-
-  file 'dump.rdb.bak': 'dump.rdb' do |t|
-    bname = t.prerequisites[1]
-    sh 'cp', bname, (bname + '.bak')
   end
 
   desc 'Backs up redis and deletes all keys'
