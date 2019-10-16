@@ -13,9 +13,9 @@ namespace 'redis' do
       $redis = Redis.new(host: 'localhost')
       $redis.ping
       puts 'connected to redis'
-    rescue StandardError => e
+    rescue StandardError => msg
       puts 'redis:connect task failed with: '
-      puts e
+      puts msg
     end
   end
 
@@ -35,6 +35,11 @@ namespace 'bigcommerce' do
       c.store_hash   = ENV['BIGCOMMERCE_STORE_HASH']
       c.client_id    = ENV['BIGCOMMERCE_CLIENT_ID']
       c.access_token = ENV['BIGCOMMERCE_ACCESS_TOKEN']
+    end
+    begin
+      rescue StandardError => msg
+      puts 'bigcommerce:connect failed with:'
+      puts msg
     end
     puts 'connect_bc'
   end
