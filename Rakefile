@@ -26,7 +26,7 @@ namespace 'bigcommerce' do
     require 'bigcommerce'
     require 'dotenv'
     Bigcommerce.configure do |c| # TODO:
-      c.store_hash   = ENV[''] # ???
+      c.store_hash   = ENV['BIGCOMMERCE_STORE_HASH']
       c.client_id    = ENV['BIGCOMMERCE_CLIENT_ID']
       c.access_token = ENV['BIGCOMMERCE_ACCESS_TOKEN']
     end
