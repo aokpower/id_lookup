@@ -7,14 +7,14 @@ end
 
 namespace 'redis' do
   desc 'prereq task for connecting to redis database DON\'T USE'
-  task :connect do
+  task :connect do |t|
     require 'redis'
     begin
       $redis = Redis.new(host: 'localhost')
       $redis.ping
       puts 'connected to redis'
     rescue StandardError => msg
-      abort("redis:connect task failed with: #{msg}")
+      abort("#{t.name} task failed with: #{msg}")
     end
   end
 
@@ -27,7 +27,7 @@ end
 
 namespace 'bigcommerce' do
   desc 'prereq task for connecting to bigcommerce. DON\'T USE'
-  task :connect do
+  task :connect do |t|
     # make connection to bigcommerce
     require 'bigcommerce'
     require 'dotenv'
@@ -38,7 +38,7 @@ namespace 'bigcommerce' do
     end
     begin
       rescue StandardError => msg
-      abort("bigcommerce:connect failed with: #{msg}")
+      abort("#{t.name} task failed with: #{msg}")
     end
     puts 'connect_bc'
   end
