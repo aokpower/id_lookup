@@ -14,14 +14,14 @@ namespace 'redis' do
       $redis.ping
       puts 'connected to redis'
     rescue StandardError => msg
-      puts 'redis:connect task failed with: '
-      puts msg
+      abort("redis:connect task failed with: #{msg}")
     end
   end
 
   desc 'Backs up redis and deletes all keys'
-  task clear: %w[redis:connect dump.rdb.bak] do
-    puts "clear_redis"
+  task clear: %w[redis:connect dump.rdb.bak] do |t|
+    puts t.name
+    # $redis.keys { |key| $redis.del(key) }
   end
 end
 
@@ -38,8 +38,7 @@ namespace 'bigcommerce' do
     end
     begin
       rescue StandardError => msg
-      puts 'bigcommerce:connect failed with:'
-      puts msg
+      abort("bigcommerce:connect failed with: #{msg}")
     end
     puts 'connect_bc'
   end
