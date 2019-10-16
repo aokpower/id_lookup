@@ -9,8 +9,14 @@ namespace 'redis' do
   desc 'prereq task for connecting to redis database DON\'T USE'
   task :connect do
     require 'redis'
-    $redis = Redis.new(host: 'localhost')
-    puts 'connected to redis'
+    begin
+      $redis = Redis.new(host: 'localhost')
+      $redis.ping
+      puts 'connected to redis'
+    rescue StandardError => e
+      puts 'redis:connect task failed with: '
+      puts e
+    end
   end
 
   desc 'Backs up redis and deletes all keys'
