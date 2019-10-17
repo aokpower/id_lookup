@@ -49,7 +49,11 @@ namespace 'bigcommerce' do
   Doesn't delete first manually, see reset task.
   HEREDOC
   multitask load_products: %w[redis:connect bigcommerce:connect] do
-    puts 'bigcommerce:load_products WIP'
+    products = Bigcommerce::Product.all
+    puts products.size
+    # maps = zip products.map(&:id), products.map(&:sku)
+    # maps.each { |(id, sku)| $redis.set(id, sku) }
+    # puts t.name + ' done.'
   end
 end
 
