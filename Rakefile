@@ -1,5 +1,3 @@
-# TODO: add catch blocks with aborts to connect tasks
-
 file 'dump.rdb.bak': 'dump.rdb' do |t|
   bname = t.prerequisites[0]
   sh 'cp', bname, (bname + '.bak')
@@ -31,16 +29,18 @@ namespace 'bigcommerce' do
     # make connection to bigcommerce
     require 'bigcommerce'
     require 'dotenv'
-    Bigcommerce.configure do |c| # TODO:
-      c.store_hash   = ENV['BIGCOMMERCE_STORE_HASH']
-      c.client_id    = ENV['BIGCOMMERCE_CLIENT_ID']
-      c.access_token = ENV['BIGCOMMERCE_ACCESS_TOKEN']
-    end
     begin
-      rescue StandardError => msg
+      Bigcommerce.configure do |c|
+        c.store_hash   = ENV['BIGCOMMERCE_STORE_HASH']
+        c.client_id    = ENV['BIGCOMMERCE_CLIENT_ID']
+        c.access_token = ENV['BIGCOMMERCE_ACCESS_TOKEN']
+      end
+      Bigcommerce::System.time # ping BigCommerce system to check connection
+      # TODO: Doesn't work, fails with 404 (?!)
+    rescue StandardError => msg
       abort("#{t.name} task failed with: #{msg}")
     end
-    puts 'connect_bc'
+    puts 'connected to bigcommerce'
   end
 
   # TODO: Should only clear redis IF getting products goes well
