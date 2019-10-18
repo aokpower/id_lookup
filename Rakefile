@@ -23,7 +23,7 @@ namespace 'redis' do
   end
 end
 
-namespace 'bigcommerce' do
+namespace 'bc' do
   desc 'prereq task for connecting to bigcommerce. DON\'T USE'
   task :connect do |t|
     # make connection to bigcommerce
@@ -48,7 +48,7 @@ namespace 'bigcommerce' do
   Updates product -> id info in redis.
   Doesn't delete first manually, see reset task.
   HEREDOC
-  multitask load_products: %w[redis:connect bigcommerce:connect] do
+  multitask load_products: %w[redis:connect bc:connect] do
     products = Bigcommerce::Product.all
     puts products.size
     # maps = zip products.map(&:id), products.map(&:sku)
@@ -58,7 +58,7 @@ namespace 'bigcommerce' do
 end
 
 desc 'clears redis database and reloads it with fresh product -> id information'
-task reset: %w[redis:clear bigcommerce:load_products]
+task reset: %w[redis:clear bc:load_products]
 
 task :default do
   puts <<~HEREDOC
