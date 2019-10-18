@@ -9,7 +9,7 @@ namespace 'redis' do
     require 'redis'
     begin
       $redis = Redis.new(host: 'localhost')
-      $redis.ping
+      $redis.ping # throws if not connected to a running redis instance
       puts 'connected to redis'
     rescue StandardError => err
       abort("#{t.name} task failed with: #{err.full_message}")
