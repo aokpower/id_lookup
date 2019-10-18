@@ -30,14 +30,16 @@ namespace 'bc' do
     require 'bigcommerce'
     require 'dotenv'
     begin
-      Bigcommerce.configure do |c|
-        c.store_hash   = ENV['BIGCOMMERCE_STORE_HASH']
-        c.client_id    = ENV['BIGCOMMERCE_CLIENT_ID']
-        c.access_token = ENV['BIGCOMMERCE_ACCESS_TOKEN']
+        Dotenv.load # Check for required keys?
+        %w[BC_STORE_HASH BC_CLIENT_ID BC_ACCESS_TOKEN].each do |var_name|
+          raise("missing environment var: #{var_name}") if ENV[var_name].nil?
+        end
+        Bigcommerce.configure do |c|
+        c.store_hash   = ENV['BC_STORE_HASH']
+        c.client_id    = ENV['BC_CLIENT_ID']
+        c.access_token = ENV['BC_ACCESS_TOKEN']
       end
-      Bigcommerce::System.time # ping BigCommerce system to check connection
-      # TODO: Check api gem source to try to make sense of following error:
-      # Doesn't work, fails with 404 (?!)
+      Bigcommerce::System.time # raises error if invalid connection
     rescue StandardError => err
       abort("#{t.name} task failed with: #{err.full_message}")
     end
