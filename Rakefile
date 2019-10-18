@@ -51,12 +51,12 @@ namespace 'bc' do
   Updates product -> id info in redis.
   Doesn't delete first manually, see reset task.
   HEREDOC
-  multitask load_products: %w[redis:connect bc:connect] do
-    products = Bigcommerce::Product.all
-    puts products.size
-    # maps = zip products.map(&:id), products.map(&:sku)
-    # maps.each { |(id, sku)| $redis.set(id, sku) }
-    # puts t.name + ' done.'
+  multitask load_products: %w[redis:connect bc:connect] do |t|
+    Bigcommerce::Product.all
+      .tap { |ps| puts('# of products: ' + ps.size.to_s) }
+      .map { |h| h.fetch_values(:sku, :id) }
+      .each { |(sku, id)| $redis.set(sku, id.to_s) }
+    puts t.name + ' done.'
   end
 end
 
