@@ -46,7 +46,6 @@ namespace 'bc' do
     puts 'connected to bigcommerce'
   end
 
-  # TODO: Should only clear redis IF getting products goes well
   desc <<~HEREDOC
   Updates product -> id info in redis.
   Doesn't delete first manually, see reset task.
