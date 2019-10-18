@@ -11,8 +11,8 @@ namespace 'redis' do
       $redis = Redis.new(host: 'localhost')
       $redis.ping
       puts 'connected to redis'
-    rescue StandardError => msg
-      abort("#{t.name} task failed with: #{msg}")
+    rescue StandardError => err
+      abort("#{t.name} task failed with: #{err.full_message}")
     end
   end
 
@@ -36,9 +36,10 @@ namespace 'bc' do
         c.access_token = ENV['BIGCOMMERCE_ACCESS_TOKEN']
       end
       Bigcommerce::System.time # ping BigCommerce system to check connection
-      # TODO: Doesn't work, fails with 404 (?!)
-    rescue StandardError => msg
-      abort("#{t.name} task failed with: #{msg}")
+      # TODO: Check api gem source to try to make sense of following error:
+      # Doesn't work, fails with 404 (?!)
+    rescue StandardError => err
+      abort("#{t.name} task failed with: #{err.full_message}")
     end
     puts 'connected to bigcommerce'
   end
