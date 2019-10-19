@@ -1,6 +1,8 @@
-file 'dump.rdb.bak': 'dump.rdb' do |t|
+file 'dump.rdb.bak': %w[dump.rdb redis:connect] do |t|
+  $redis.save
   bname = t.prerequisites[0]
   sh 'cp', bname, (bname + '.bak')
+  puts "backed up redis to disk at #{t.name}"
 end
 
 namespace 'redis' do
