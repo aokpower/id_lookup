@@ -20,7 +20,7 @@ namespace 'redis' do
 
   desc 'Backs up redis and deletes all keys'
   task clear: %w[redis:connect dump.rdb.bak] do |t|
-    $redis.keys.each { |key| $redis.del(key) }
+    $redis.flushdb
     puts 'deleted all redis keys'
   end
 end
