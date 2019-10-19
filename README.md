@@ -1,24 +1,26 @@
 # ID Lookup
-Readme stub
+This app is basically a read only webapi that looks up corresponding the
+corresponding ids of bigcommerce skus for your store, and some related rake
+tasks that take care of managing your redis instance and getting the
+product sku -> id information from BigCommerce's API
 
-## Description
-- What
-- Why
-- How
+It was developed against ruby 2.6.5
 
-## Usage
-- web api doc
-- data loading/flushing cli
-- logging
+run redis and puma and your good.
+The expected environment variables (which can be put into a .env file) are:
+- BC_STORE_HASH (found during api key creation, should be around 10 characters)
+- BC_CLIENT_ID
+- BC_ACCESS_TOKEN
 
-## Deployment
-- dependencies
-- target environment
-- redis
-- Credentials
-- logging/error reporting
+there's only one uri: /check/<sku_to_check>
+it just returns either the key value, or an empty page. just text.
 
-## Resources
-- Trello board
-- Relevent github links
-- Author contacts
+Very KISS 
+
+TODO:
+    - Don't assume only one redis-server process running, or that it's on localhost
+    - shell script that runs redis and puma
+    - better logging
+    - What if multiple products with same sku?
+    - sku that has variants?
+    - Loading skus from PartSmart
