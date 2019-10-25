@@ -18,9 +18,9 @@ it just returns either the key value, or an empty page. just text.
 Very KISS 
 
 TODO:
-    - Don't assume only one redis-server process running, or that it's on localhost
-    - shell script that runs redis and puma
-    - better logging
-    - What if multiple products with same sku?
-    - sku that has variants?
-    - Loading skus from PartSmart
+- Don't assume only one redis-server process running, or that it's on localhost
+- shell script that runs redis and puma
+- better logging
+- What if multiple products with same sku?
+- sku that has variants?
+- Loading skus from PartSmart

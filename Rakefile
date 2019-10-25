@@ -10,7 +10,9 @@ namespace 'redis' do
   task :connect do |t|
     require 'redis'
     begin
-      $redis = Redis.new(host: 'localhost')
+      ENV['IDL_REDIS_HOST'].then do |redis_host|
+        $redis = redis_host.nil? ? Redis.new : Redis.new(host: redis_host)
+      end
       $redis.ping # throws if not connected to a running redis instance
       puts 'connected to redis'
     rescue StandardError => err
