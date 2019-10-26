@@ -5,7 +5,15 @@ require 'logger'
 $logger = Logger.new(STDOUT)
 # $logger.level = Logger::INFO
 
-$redis = Redis.new(host: 'localhost')
+ENV['IDL_REDIS_HOST'].then do |redis_host|
+  $redis = redis_host.nil? ? Redis.new : Redis.new(host: redis_host)
+end
+
+begin
+  $redis.ping
+  rescue StandardErr => err
+    abort("Failed to connect to redis; #{err.full_message}")
+end
 
 class App < Roda
   route do |r|
