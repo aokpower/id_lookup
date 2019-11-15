@@ -16,6 +16,8 @@ begin
 end
 
 class App < Roda
+  plugin :route_csrf
+  
   route do |r|
     r.get 'check', String do |sku|
       begin
