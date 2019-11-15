@@ -2,7 +2,9 @@ require 'roda'
 require 'redis'
 require 'logger'
 
-$logger = Logger.new(STDOUT)
+LOG_FILE_LIMIT = 5.freeze
+LOG_BYTE_LIMIT = 1024000.freeze
+$logger = Logger.new('logs/id_lookup.log', LOG_FILE_LIMIT, LOG_BYTE_LIMIT)
 
 ENV['IDL_REDIS_HOST'].then do |redis_host|
   $redis = redis_host.nil? ? Redis.new : Redis.new(host: redis_host)
