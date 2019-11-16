@@ -28,7 +28,10 @@ class App < Roda
   route do |r|
     r.get 'check', String do |sku|
       begin
-        $redis.get(sku)
+        # Redis#get can return nil which is an error return val for roda
+        # but not having a record is a valid state, not an error state.
+        # so: #to_s
+        $redis.get(sku).to_s
       rescue => err
         $logger.error('Caught redis error:')
         $logger.error(err)
