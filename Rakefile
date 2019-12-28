@@ -34,11 +34,11 @@ namespace 'bc' do
     require 'bigcommerce'
     require 'dotenv'
     begin
-        Dotenv.load # Check for required keys?
-        %w[BC_STORE_HASH BC_CLIENT_ID BC_ACCESS_TOKEN].each do |var_name|
-          raise("missing environment var: #{var_name}") if ENV[var_name].nil?
-        end
-        Bigcommerce.configure do |c|
+      Dotenv.load
+      %w[BC_STORE_HASH BC_CLIENT_ID BC_ACCESS_TOKEN].each do |var_name|
+        raise("missing environment var: #{var_name}") if ENV[var_name].nil?
+      end
+      Bigcommerce.configure do |c|
         c.store_hash   = ENV['BC_STORE_HASH']
         c.client_id    = ENV['BC_CLIENT_ID']
         c.access_token = ENV['BC_ACCESS_TOKEN']
