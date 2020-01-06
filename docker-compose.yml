@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+    app:
+        build: .
+        image: aokpower/id_lookup_app:1.0
+        ports:
+            - 9292:9292
+    
+    redis:
+        image: redis:latest
