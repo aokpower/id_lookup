@@ -17,11 +17,13 @@ there's only one uri: /check/<sku_to_check>
 it just returns either the key value, or an empty page. just text.
 
 ## Deployment
-open 2 tmux tabs, run ```puma``` in one and ```redis-server``` in the other.
+ ```bash
+ docker-compose build; docker-compose run app bundle exec rake reset; docker-compose up
+ ```
 
 ## TODO:
 - [x] better logging
 - [x] Handle errors
 - [ ] What if multiple products with same sku?
 - [ ] sku that has variants?
-- [ ] Better deployment section in README
+- [x] Better deployment section in README
