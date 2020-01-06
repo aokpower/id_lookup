@@ -12,7 +12,7 @@ end
 
 begin
   $redis.ping
-  rescue StandardErr => err
+  rescue StandardError => err
     $logger.fatal("Failed to connect to redis")
     abort("Failed to connect to redis; #{err.full_message}")
 end
