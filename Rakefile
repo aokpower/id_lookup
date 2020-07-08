@@ -55,11 +55,25 @@ namespace 'bc' do
   Doesn't delete first manually, see reset task.
   HEREDOC
   multitask load_products: %w[redis:connect bc:connect dump.rdb.bak] do |t|
-    Bigcommerce::Product.all
-      .tap { |ps| puts('# of products: ' + ps.size.to_s) }
-      .map { |h| h.fetch_values(:sku, :id) }
-      .each { |(sku, id)| $redis.set(sku, id.to_s) }
-    puts t.name + ' done.'
+    
+    puts('product count' + Bigcommerce::Product.count.to_s + '.')
+
+    loaded_products = 0
+    page_index = 1
+
+    while true
+      page = Bigcommerce::Product.all(page: page_index)
+      page_index += 1
+
+      break if page.empty?
+
+      page.each do |product|
+        sku, id = product.fetch_values(:sku, :id)
+        $redis.set(sku, id.to_s)
+        loaded_products += 1
+      end
+    end
+    puts "Added #{loaded_products.to_s} products to redis database."
   end
 end
 
