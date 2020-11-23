@@ -12,5 +12,6 @@ gem 'dotenv'
 gem 'rake'
 
 group :development do
+  gem 'solargraph'
   gem 'pry'
 end
