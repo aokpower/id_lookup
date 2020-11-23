@@ -27,58 +27,58 @@ namespace 'redis' do
   end
 end
 
-namespace 'bc' do
-  desc 'prereq task for connecting to bigcommerce. DON\'T USE'
-  task :connect do |t|
-    # make connection to bigcommerce
-    require 'bigcommerce'
-    require 'dotenv'
-    begin
-      Dotenv.load
-      %w[BC_STORE_HASH BC_CLIENT_ID BC_ACCESS_TOKEN].each do |var_name|
-        raise("missing environment var: #{var_name}") if ENV[var_name].nil?
-      end
-      Bigcommerce.configure do |c|
-        c.store_hash   = ENV['BC_STORE_HASH']
-        c.client_id    = ENV['BC_CLIENT_ID']
-        c.access_token = ENV['BC_ACCESS_TOKEN']
-      end
-      Bigcommerce::System.time # raises error if invalid connection
-    rescue StandardError => err
-      abort("#{t.name} task failed with: #{err.full_message}")
-    end
-    puts 'connected to bigcommerce'
-  end
+# namespace 'bc' do
+#   desc 'prereq task for connecting to bigcommerce. DON\'T USE'
+#   task :connect do |t|
+#     # make connection to bigcommerce
+#     require 'bigcommerce'
+#     require 'dotenv'
+#     begin
+#       Dotenv.load
+#       %w[BC_STORE_HASH BC_CLIENT_ID BC_ACCESS_TOKEN].each do |var_name|
+#         raise("missing environment var: #{var_name}") if ENV[var_name].nil?
+#       end
+#       Bigcommerce.configure do |c|
+#         c.store_hash   = ENV['BC_STORE_HASH']
+#         c.client_id    = ENV['BC_CLIENT_ID']
+#         c.access_token = ENV['BC_ACCESS_TOKEN']
+#       end
+#       Bigcommerce::System.time # raises error if invalid connection
+#     rescue StandardError => err
+#       abort("#{t.name} task failed with: #{err.full_message}")
+#     end
+#     puts 'connected to bigcommerce'
+#   end
 
-  desc <<~HEREDOC
-  Updates product -> id info in redis.
-  Doesn't delete first manually, see reset task.
-  HEREDOC
-  multitask load_products: %w[redis:connect bc:connect dump.rdb.bak] do |t|
+#   desc <<~HEREDOC
+#   Updates product -> id info in redis.
+#   Doesn't delete first manually, see reset task.
+#   HEREDOC
+#   multitask load_products: %w[redis:connect bc:connect dump.rdb.bak] do |t|
     
-    puts('product count' + Bigcommerce::Product.count.to_s + '.')
+#     puts('product count' + Bigcommerce::Product.count.to_s + '.')
 
-    loaded_products = 0
-    page_index = 1
+#     loaded_products = 0
+#     page_index = 1
 
-    while true
-      page = Bigcommerce::Product.all(page: page_index)
-      page_index += 1
+#     while true
+#       page = Bigcommerce::Product.all(page: page_index)
+#       page_index += 1
 
-      break if page.empty?
+#       break if page.empty?
 
-      page.each do |product|
-        sku, id = product.fetch_values(:sku, :id)
-        $redis.set(sku, id.to_s)
-        loaded_products += 1
-      end
-    end
-    puts "Added #{loaded_products.to_s} products to redis database."
-  end
-end
+#       page.each do |product|
+#         sku, id = product.fetch_values(:sku, :id)
+#         $redis.set(sku, id.to_s)
+#         loaded_products += 1
+#       end
+#     end
+#     puts "Added #{loaded_products.to_s} products to redis database."
+#   end
+# end
 
-desc 'clears redis database and reloads it with fresh product -> id information'
-task reset: %w[redis:clear bc:load_products]
+# desc 'clears redis database and reloads it with fresh product -> id information'
+# task reset: %w[redis:clear bc:load_products]
 
 task :default do
   puts <<~HEREDOC
