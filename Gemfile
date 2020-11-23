@@ -4,11 +4,12 @@ source "https://rubygems.org"
 
 git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
-gem 'puma'
-gem 'roda'
-gem 'redis'
 gem 'dotenv'
+gem 'puma'
 gem 'rake'
+gem 'redis'
+gem 'roda'
+gem 'shopify_api'
 
 group :development do
   gem 'solargraph'
