@@ -1,3 +1,13 @@
+# Helper for shopify:load. Don't want to do this as a proc for perf reasons
+def load_variants(shopify_products, redis)
+  shopify_products.map(&:variants).flatten.each do |variant|
+    sku = variant.sku.to_s
+    id  = variant.id.to_s
+
+    redis.set(sku, id)
+  end
+end
+
 file 'dump.rdb.bak': %w[dump.rdb redis:connect] do |t|
   $redis.save
   bname = t.prerequisites[0]
@@ -27,58 +37,46 @@ namespace 'redis' do
   end
 end
 
-# namespace 'bc' do
-#   desc 'prereq task for connecting to bigcommerce. DON\'T USE'
-#   task :connect do |t|
-#     # make connection to bigcommerce
-#     require 'bigcommerce'
-#     require 'dotenv'
-#     begin
-#       Dotenv.load
-#       %w[BC_STORE_HASH BC_CLIENT_ID BC_ACCESS_TOKEN].each do |var_name|
-#         raise("missing environment var: #{var_name}") if ENV[var_name].nil?
-#       end
-#       Bigcommerce.configure do |c|
-#         c.store_hash   = ENV['BC_STORE_HASH']
-#         c.client_id    = ENV['BC_CLIENT_ID']
-#         c.access_token = ENV['BC_ACCESS_TOKEN']
-#       end
-#       Bigcommerce::System.time # raises error if invalid connection
-#     rescue StandardError => err
-#       abort("#{t.name} task failed with: #{err.full_message}")
-#     end
-#     puts 'connected to bigcommerce'
-#   end
+namespace 'shopify' do
+   desc 'prereq task for connecting to shopify. Don\'t use this on command line'
+   task :connect do |t|
+     require 'dotenv'
+     Dotenv.load
+     ["SHOPIFY_API_VERSION",
+      "SHOPIFY_API_KEY",
+      "SHOPIFY_PASSWORD",
+      "SHOPIFY_STORE_NAME"].each do |var_name|
+       raise("Missing environment var is required: #{var_name}") if ENV[var_name].nil?
+     end
 
-#   desc <<~HEREDOC
-#   Updates product -> id info in redis.
-#   Doesn't delete first manually, see reset task.
-#   HEREDOC
-#   multitask load_products: %w[redis:connect bc:connect dump.rdb.bak] do |t|
-    
-#     puts('product count' + Bigcommerce::Product.count.to_s + '.')
+     require 'shopify_api'
+     shop_url = "https://#{ENV['SHOPIFY_API_KEY']}:#{ENV['SHOPIFY_PASSWORD']}@#{ENV['SHOPIFY_STORE_NAME']}.myshopify.com"
+     ShopifyAPI::Base.site        = shop_url
+     ShopifyAPI::Base.api_version = ENV['SHOPIFY_API_VERSION']
+   end
 
-#     loaded_products = 0
-#     page_index = 1
+   desc 'load sku -> id product information into redis'
+   multitask load: %w[redis:connect shopify:connect dump.rdb.bak] do |t|
+     begin
+       puts "Loading product info into redis..."
+       count = 0
 
-#     while true
-#       page = Bigcommerce::Product.all(page: page_index)
-#       page_index += 1
+       products = ShopifyAPI::Product.find(:all, params: { limit: 50 })
+       count += products.count
+       load_variants(products, $redis)
 
-#       break if page.empty?
+       while products.next_page?
+         products.fetch_next_page
+         count += products.count
+         load_variants(products, $redis)
+       end
 
-#       page.each do |product|
-#         sku, id = product.fetch_values(:sku, :id)
-#         $redis.set(sku, id.to_s)
-#         loaded_products += 1
-#       end
-#     end
-#     puts "Added #{loaded_products.to_s} products to redis database."
-#   end
-# end
-
-# desc 'clears redis database and reloads it with fresh product -> id information'
-# task reset: %w[redis:clear bc:load_products]
+       puts "Successfully loaded #{count} products"
+    rescue StandardError => err
+      abort("#{t.name} task failed with: #{err.full_message}")
+    end
+   end
+end
 
 task :default do
   puts <<~HEREDOC
