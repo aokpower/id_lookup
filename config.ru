@@ -27,6 +27,10 @@ class App < Roda
 
   route do |r|
     r.get 'check', String do |sku|
+      # Prevents CORS issues. Permissive header because this is an API for
+      # unsecured information anyway, as long as users know who they are
+      # talking to (ssl/tls) this shouldn't be an issue.
+      response['Access-Control-Allow-Origin'] = '*'
       # Redis#get can return nil which is an error return val for roda
       # but not having a record is a valid state, not an error state.
       # so: #to_s
