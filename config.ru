@@ -1,6 +1,7 @@
 require 'roda'
 require 'redis'
 require 'logger'
+require 'rack/cors'
 
 LOG_FILE_LIMIT = 5
 LOG_BYTE_LIMIT = 1_024_000
@@ -17,6 +18,7 @@ rescue StandardError => e
   abort("Failed to connect to redis; #{e.full_message}")
 end
 
+# TODO: Extract to separate file and require file; run Klass.freeze.app
 class App < Roda
   plugin :route_csrf
 
@@ -25,12 +27,15 @@ class App < Roda
     err.message
   end
 
+  use Rack::Cors, debug: false, logger: $logger do
+    allow do
+      origins '*'
+      resource '*', headers: :any, methods: [:get]
+    end
+  end
+
   route do |r|
     r.get 'check', String do |sku|
-      # Prevents CORS issues. Permissive header because this is an API for
-      # unsecured information anyway, as long as users know who they are
-      # talking to (ssl/tls) this shouldn't be an issue.
-      response['Access-Control-Allow-Origin'] = '*'
       # Redis#get can return nil which is an error return val for roda
       # but not having a record is a valid state, not an error state.
       # so: #to_s

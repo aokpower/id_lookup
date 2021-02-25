@@ -10,6 +10,7 @@ gem 'rake'
 gem 'redis'
 gem 'roda'
 gem 'shopify_api'
+gem 'rack-cors'
 
 group :development do
   gem 'solargraph'
