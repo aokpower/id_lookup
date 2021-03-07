@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+redis-server &
+REDISPID=$!
+echo $REDISPID > pids/redis-server.pid
+
+puma &
+PUMAPID=$!
+echo $PUMAPID > pids/puma.pid
+
+echo "Started redis ($REDISPID) and puma ($PUMAPID)"
