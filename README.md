@@ -1,29 +1,41 @@
 # ID Lookup
-This app is a read only webapi that looks up corresponding the corresponding ids
-of bigcommerce skus for your store, and some related rake tasks that take care
-of managing your redis instance and getting the product sku -> id information
-from BigCommerce's API
+Load sku -> shopify id info into redis and run a webserver exposing that info through /check/<sku>, where it returns empty for key not found and a string with a shopify id if it exists. Intended to be used with the shopify-partsmart client side integration.
 
-It is developed using ruby 2.6.5
+## Setup
+requires the ruby version specified in `.ruby-version`, currently `2.7.4`
 
-run redis and puma and your good.
+just use `bundle install`, and everything except redis should be ready.
+
+Make sure your redis process is running somewhere (I've just been using a tmux session) with `redis-server` and you can run the api with the `puma` command.
+
+## Secrets, config vars
 The expected environment variables (which can be put into a .env file) are:
-- BC_STORE_HASH (found during api key creation, should be around 10 characters)
-- BC_CLIENT_ID
-- BC_ACCESS_TOKEN
+- SHOPIFY_API_KEY
+- SHOPIFY_PASSWORD
+- SHOPIFY_STORE_NAME
 - IDL_REDIS_HOST [OPTIONAL] (Redis.new host: <this value here>)
 
 there's only one uri: /check/<sku_to_check>
 it just returns either the key value, or an empty page. just text.
 
 ## Deployment
- ```bash
- docker-compose build; docker-compose run app bundle exec rake reset; docker-compose up
- ```
+```bash
+redis-server &
+puma
+```
 
-## TODO:
-- [x] better logging
-- [x] Handle errors
-- [ ] What if multiple products with same sku?
-- [ ] sku that has variants?
-- [x] Better deployment section in README
+There's a docker-compose setup I had working at some point but not sure if it's working now
+
+## Commands / rake tasks
+The redis database is managed primarily through 2 commands, `redis:clear` and `shopify:load`.
+
+`redis:clear` makes a database backup to 'dump.rdb.bak' and then clears all keys.
+
+`shopify:load` connects to shopify and populates the database with sku -> shopify id values for all products.
+
+## Development
+The 2 main files are `Rakefile` and `config.ru`.
+
+`Rakefile` defines the commands for managing redis and loading shopify info into redis.
+
+`config.ru` defines the api and logs to logs/id_lookup.log.
