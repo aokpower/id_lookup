@@ -8,6 +8,9 @@ just use `bundle install`, and everything except redis should be ready.
 
 Make sure your redis process is running somewhere (I've just been using a tmux session) with `redis-server` and you can run the api with the `puma` command.
 
+Currently run through a NGINX 'sites-enabled' configuration, see `/etc/nginx/sites-enabled`
+SSL is automatically handled through lets-encrypt and cert-bot, see `id_lookup.conf`
+
 ## Secrets, config vars
 The expected environment variables (which can be put into a .env file) are:
 - SHOPIFY_API_KEY
