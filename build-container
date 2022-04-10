@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Try without sudo first
+docker build . -t id_lookup:latest \
+|| sudo docker build . -t id_lookup:latest
