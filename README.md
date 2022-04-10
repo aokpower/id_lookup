@@ -6,10 +6,18 @@ requires the ruby version specified in `.ruby-version`, currently `2.7.4`
 
 just use `bundle install`, and everything except redis should be ready.
 
-Make sure your redis process is running somewhere (I've just been using a tmux session) with `redis-server` and you can run the api with the `puma` command.
+### Redis & Puma
+
+*Redis is automatically started (and restarted) by systemd* in the background, see /etc/systemd/system/redis.service
+
+to check the status of the redis service use `sudo systemctl list-units | grep redis`
 
 Currently run through a NGINX 'sites-enabled' configuration, see `/etc/nginx/sites-enabled`
 SSL is automatically handled through lets-encrypt and cert-bot, see `id_lookup.conf`
+
+To start the server, run `puma & disown`, which starts the puma server and puts it in a background process.
+To stop the server, you'll have to find the process id through `ps aux | grep -v grep | grep -i puma`, and it should be the second number.
+Something like `21356`, and once you have that number you can run `kill`, for example: `kill 21356`
 
 ## Secrets, config vars
 The expected environment variables (which can be put into a .env file) are:
