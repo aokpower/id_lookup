@@ -1,10 +1,14 @@
-FROM ruby:3.0
+FROM ruby:3.0-alpine
 
 COPY Gemfile Gemfile.lock ./
 
 WORKDIR /app
 
-RUN gem install bundler && bundle install
+RUN apk add make gcc musl-dev
+
+RUN gem install bundler && \
+    bundle config set without development test && \
+    bundle install
 
 COPY . .
 
